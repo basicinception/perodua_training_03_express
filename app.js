@@ -1,16 +1,20 @@
 var express = require('express');
 var app = express();
+var fs = require("fs");
+var bodyParser = require('body-parser');
+var multer = require('multer');
 
-app.use(express.static('public')); 
+app.use(express.static('public'));
 
 app.engine('html', require('ejs').renderFile);
 
 app.set('views', __dirname + '/views');
 app.set('view engine', 'html');
 
-var bodyParser = require('body-parser');
-// Create application/x-www-form-urlencoded parser
-var urlencodedParser = bodyParser.urlencoded({ extended: false })
+var upload = multer({ dest: '/tmp/'});
+
+app.use(express.static('public'));
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // This responds with "Hello World" on the homepage
 app.get('/', (req, res) => {
@@ -18,14 +22,25 @@ app.get('/', (req, res) => {
     res.render('home', { name: 'YOUR_NAME' });
 })
 
-app.post('/process_post', urlencodedParser, function (req, res) {
- // Prepare output in JSON format
-    var response = {
-        first_name:req.body.first_name,
-        last_name:req.body.last_name
-    };
-    console.log(response);
-    res.end(JSON.stringify(response));
+app.post('/file_upload', upload.single('file'), function (req, res) {
+    console.log(req.file);
+
+    var file = __dirname + "/" + req.file.filename;
+    fs.readFile(req.file.path, function (err, data) {
+        fs.writeFile(file, data, function (err) {
+            if (err) {
+                console.log(err);
+            } else {
+                response = {
+
+                    message: 'File uploaded successfully',
+                    filename: req.file.filename
+                };
+            }
+            console.log(response);
+            res.end(JSON.stringify(response));
+        });
+    });
 })
 
 
