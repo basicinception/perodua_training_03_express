@@ -1,10 +1,17 @@
 var express = require('express');
 var app = express();
 
+app.use(express.static('public')); 
+
+app.engine('html', require('ejs').renderFile);
+
+app.set('views', __dirname + '/views');
+app.set('view engine', 'html');
+
 // This responds with "Hello World" on the homepage
 app.get('/', (req, res) => {
     console.log("Got a GET request for the homepage");
-    res.send('Hello GET');
+    res.render('home');
 })
 
 // This responds a POST request for the homepage
